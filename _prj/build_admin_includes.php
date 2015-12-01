@@ -443,6 +443,7 @@ return '<?php
 function auto_load($classname)
 {/*{{{*/
 		$entity_ucfirst = "";
+		$APPLICATION_PATH = APPLICATION_PATH;
         $classpath = array(
 ___DATA___
 		);
@@ -457,14 +458,23 @@ spl_autoload_register(\'auto_load\');
 
     public function run($rootPath,$outfile,$cacheKey)
     {/*{{{*/
-        self::$_paths = split(":",$rootPath);
+        self::$_paths = explode(":",$rootPath);
+        $arr = explode(":",$cacheKey);
+        $appRealRootPath = $arr[0];
+        $appDefineRootPath = $arr[1];
         foreach (self::$_paths as $path)
         {
+
             $files = self::findFiles($path);
+
             foreach (self::findClasses($files) as $class => $filename)
             {
-                if (empty($classes[$class]))
-					$classes[$class] = str_replace("\\","\\\\",realpath($filename));
+                if (empty($classes[$class])){
+                    $filename = str_replace("\\","\\\\",realpath($filename));
+                    $filename = str_replace($appRealRootPath,'',$filename);
+                    $filename = $appDefineRootPath.$filename;
+                    $classes[$class] = $filename;
+                }
                 else
                     echo "Repeatedly Class $class in file $filename\n";
             }
